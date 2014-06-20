@@ -291,8 +291,8 @@ namespace AirSpeciesProperties
             double cv_vib = vib.cv;
             double cv_elec = elec.cv;
 
-            sumModes = _calculateTranlation() + _calculateRotation() + _calculateVibration()
-                      + _calculateElectrical();
+            sumModes = _calculateTranlation() + _calculateRotation()
+                      + _calculateVibration() + _calculateElectrical();
 
             output.Temperature = temperature;         // units: K
             output.Pressure = pressure;            // units: MPa
@@ -333,13 +333,17 @@ namespace AirSpeciesProperties
             output.GibbsEnergy = sumModes.gibbs / _molWeight;     // units: kJ/kg.
             output.HelmholtzEnergy = sumModes.helmholtz / _molWeight; // units: kJ/kg.
 
+            // Calculate the dynamic viscosity (mu) of the gas species [units: kg/m-s].
             output.DynamicViscosity = (2.0 / (3.0 * Math.PI * Math.Pow((2.0 * _radius), 2.0)))
                                      * Math.Sqrt(_mass * k * _temp / Math.PI);
 
+            // Calculate the kinematic viscosity (nu) of the species [units: m^2/s].
             output.KinematicViscosity = output.DynamicViscosity / output.Density;
 
-            output.ThermalConductivity = output.DynamicViscosity * ((2.5 * cv_trans)
-                                         + cv_rot + cv_vib + cv_elec);
+            // Calculate the thermal conductivity of the gas species [units: W/m-K].
+            // 1000.0 = convert kW -> W.
+            output.ThermalConductivity = 1000.0 * output.DynamicViscosity
+                                        * ((2.5 * cv_trans) + cv_rot + cv_vib + cv_elec);
 
             return output;
         }
